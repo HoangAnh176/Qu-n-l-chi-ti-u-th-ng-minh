@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Basic Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Material 3 Light Theme Colors -->
+    <color name="md_theme_light_primary">#006C4C</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#89F8C7</color>
+    <color name="md_theme_light_onPrimaryContainer">#002114</color>
+
+    <color name="md_theme_light_secondary">#4D6357</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#CFE9D8</color>
+    <color name="md_theme_light_onSecondaryContainer">#092016</color>
+
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+
+    <color name="md_theme_light_background">#FBFDF9</color>
+    <color name="md_theme_light_onBackground">#191C1A</color>
+    <color name="md_theme_light_surface">#FBFDF9</color>
+    <color name="md_theme_light_onSurface">#191C1A</color>
+    <color name="md_theme_light_surfaceVariant">#DBE5DD</color>
+    <color name="md_theme_light_onSurfaceVariant">#404943</color>
+
+    <!-- Updated existing colors to be more modern and harmonious -->
+    <color name="pear">#C6D53F</color>
+    <color name="lotion">#FAFAFA</color>
+    <color name="pink">#E8609F</color>
+    <color name="red">#EF5350</color>
+    <color name="green">#4CAF50</color>
+    <color name="dark_green">#006C4C</color>
+</resources>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/lotion"
+    android:fitsSystemWindows="true">
+
+    <!-- Header với tiêu đề và nút tìm kiếm -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="?android:colorBackground"
+        android:gravity="center_vertical"
+        android:elevation="4dp">
+
+        <!-- Nút quay lại bên trái -->
+        <ImageButton
+            android:id="@+id/btn_back_tb"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="4dp"
+            android:src="@drawable/icreturn"
+            android:scaleType="centerInside"
+            android:layout_marginRight="110dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <TextView
+            android:id="@+id/testOin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notification"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <!-- Tab layout để phân loại thông báo -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:colorBackground"
+        app:tabIndicatorColor="#6200EE"
+        app:tabSelectedTextColor="#6200EE"
+        app:tabTextColor="#616161">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tất cả"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chưa đọc"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cảnh báo"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- RecyclerView hiển thị danh sách thông báo -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_notifications"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_notification" />
+
+    <!-- Empty view khi không có thông báo -->
+    <LinearLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_empty_notifications"
+            android:contentDescription="Không có thông báo"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Không có thông báo nào"
+            android:textColor="#9E9E9E"
+            android:textSize="16sp"/>
+    </LinearLayout>
+</LinearLayout>

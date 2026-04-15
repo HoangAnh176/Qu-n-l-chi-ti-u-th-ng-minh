@@ -1,0 +1,26 @@
+package com.example.n03_quanlychitieu.model;
+
+public class Transaction {
+    public String id;
+    public double amount;
+    public String description;
+    public String date; // ISO 8601 string
+    public String type; // "income" or "expense"
+    public String categoryName;
+    public String categoryIcon;
+    public String categoryId;
+    public String budgetId;
+
+    public Transaction(String id, double amount, String description, String date, String type,
+                       String categoryName, String categoryIcon, String categoryId, String budgetId) {
+        this.id = id;
+        this.amount = amount;
+        this.description = description;
+        this.date = date;
+        this.type = type;
+        this.categoryName = categoryName;
+        this.categoryIcon = categoryIcon;
+        this.categoryId = categoryId;
+        this.budgetId = budgetId;
+    }
+}

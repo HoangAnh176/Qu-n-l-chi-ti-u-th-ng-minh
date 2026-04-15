@@ -1,0 +1,21 @@
+> Task :app:generateIcons
+
+> Task :app:runIncomeIconGen
+Failed ic_outline_price_check: HTTP Error 404: Not Found
+Failed ic_outline_request_quote: HTTP Error 404: Not Found
+Failed ic_outline_sell: HTTP Error 404: Not Found
+Failed ic_outline_storefront: HTTP Error 404: Not Found
+Failed ic_outline_credit_score: HTTP Error 404: Not Found
+Failed ic_outline_point_of_sale: HTTP Error 404: Not Found
+Failed ic_outline_receipt_long: HTTP Error 404: Not Found
+Failed ic_outline_diamond: HTTP Error 404: Not Found
+Failed ic_outline_volunteer_activism: HTTP Error 404: Not Found
+Failed ic_outline_money: HTTP Error 404: Not Found
+Done generating income icons
+
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:checkDebugAarMetadata
+
+BUILD SUCCESSFUL in 10s
+3 actionable tasks: 3 executed
