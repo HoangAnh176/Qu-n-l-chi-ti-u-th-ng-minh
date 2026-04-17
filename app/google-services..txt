@@ -1,2 +1,0 @@
-Lấy file cấu hình google-services trong firebase console để đặt vào đây.
-Thay thế đuôi tệp: txt ---> json
