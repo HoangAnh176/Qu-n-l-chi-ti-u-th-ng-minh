@@ -70,9 +70,14 @@ public class UpdateIncomeActivity extends AppCompatActivity {
             } catch (ParseException ignored) {}
         } else if (originalDate != null) {
             try {
-                Date d = dispFmt.parse(originalDate);
+                Date d = isoFmt.parse(originalDate);
                 if (d != null) selectedCalendar.setTime(d);
-            } catch (Exception ignored) {}
+            } catch (Exception e1) {
+                try {
+                    Date d = dispFmt.parse(originalDate);
+                    if (d != null) selectedCalendar.setTime(d);
+                } catch (Exception ignored) {}
+            }
         }
         updateDateDisplay();
         if (amount != null) {
