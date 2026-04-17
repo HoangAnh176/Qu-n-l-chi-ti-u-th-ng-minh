@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.app.DatePickerDialog;
 import java.util.Calendar;
@@ -35,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private String userId;
     private RadioGroup rgType;
     private RadioButton rbExpense, rbIncome;
-    private TextView tvDate, tvAmountLabel, tvPrevDate, tvNextDate;
+    private TextView tvDate, tvAmountLabel;
+    private ImageView tvPrevDate, tvNextDate;
     private EditText etNote, etAmount;
     private RecyclerView rvCategories;
     private Button btnSubmit;
@@ -63,6 +65,15 @@ public class MainActivity extends AppCompatActivity {
         setupListeners();
         loadCategories();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (auth != null && auth.isUserLoggedIn()) {
+            loadCategories();
+        }
+    }
+
     private void initViews() {
         rgType = findViewById(R.id.rg_type);
         rbExpense = findViewById(R.id.rb_expense);

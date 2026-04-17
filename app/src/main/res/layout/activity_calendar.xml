@@ -69,58 +69,75 @@
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="CN" android:gravity="center" android:textColor="#FF0000"/>
     </LinearLayout>
 
-    <GridView
+    <com.example.n03_quanlychitieu.utils.ExpandableHeightGridView
         android:id="@+id/gv_calendar"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="wrap_content"
         android:numColumns="7"
+        android:horizontalSpacing="1dp"
+        android:verticalSpacing="1dp"
+        android:background="#E0E0E0"
         app:layout_constraintTop_toBottomOf="@id/ll_week_days" />
 
-    <LinearLayout
-        android:id="@+id/ll_summary"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="3"
-        android:paddingVertical="8dp"
-        android:background="@android:color/white"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
         app:layout_constraintTop_toBottomOf="@id/gv_calendar">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
             android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thu nhập" />
-            <TextView android:id="@+id/tv_total_income" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#2196F3" android:textStyle="bold" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi tiêu" />
-            <TextView android:id="@+id/tv_total_expense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#F44336" android:textStyle="bold" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng" />
-            <TextView android:id="@+id/tv_total_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#000000" android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_transactions"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
-        app:layout_constraintTop_toBottomOf="@id/ll_summary" />
+            <LinearLayout
+                android:id="@+id/ll_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:layout_marginTop="16dp"
+                android:paddingVertical="8dp"
+                android:background="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thu nhập" />
+                    <TextView android:id="@+id/tv_total_income" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#2196F3" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi tiêu" />
+                    <TextView android:id="@+id/tv_total_expense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#F44336" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng" />
+                    <TextView android:id="@+id/tv_total_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="#000000" android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_transactions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"

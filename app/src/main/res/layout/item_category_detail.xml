@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -33,12 +34,11 @@
             android:textSize="16sp" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_next"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginStart="8dp"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:tint="#999" />
+            android:src="@drawable/ic_next"
+            app:tint="#666666" />
     </LinearLayout>
 
     <!-- For daily transaction items -->
@@ -96,12 +96,11 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_next"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="8dp"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                app:tint="#999" />
+                android:src="@drawable/ic_next"
+                app:tint="#666666" />
         </LinearLayout>
     </LinearLayout>
 

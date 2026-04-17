@@ -26,6 +26,7 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
 
     public interface OnItemClickListener {
         void onMonthItemClick(int month);
+        void onTransactionClick(DetailItem item);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -90,6 +91,12 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
                     holder.ivCatIcon.setImageResource(resId);
                 }
             }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onTransactionClick(item);
+                }
+            });
         }
     }
 
@@ -123,6 +130,10 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
         public double amount;
         public String catName;
         public String icon;
+        public String id;
+        public String desc;
+        public String catId;
+        public String rawDate;
 
         // Yearly
         public DetailItem(String monthOrDayStr, double amount) {
@@ -136,6 +147,18 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
             this.amount = amount;
             this.catName = catName;
             this.icon = icon;
+        }
+
+        // Monthly (Daily) with extra details
+        public DetailItem(String dateStr, double amount, String catName, String icon, String id, String desc, String catId, String rawDate) {
+            this.dateStr = dateStr;
+            this.amount = amount;
+            this.catName = catName;
+            this.icon = icon;
+            this.id = id;
+            this.desc = desc;
+            this.catId = catId;
+            this.rawDate = rawDate;
         }
     }
 }

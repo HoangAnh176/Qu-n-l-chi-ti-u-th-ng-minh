@@ -14,12 +14,13 @@ public class CalendarGridAdapter extends BaseAdapter {
     private Context context;
     private List<String> days;
     private List<Double> sums; // 0 if no sum
-    private int currentMonth; // to check if it's outside month
+    private List<Boolean> isCurrentMonth; // to check if it's outside month
 
-    public CalendarGridAdapter(Context context, List<String> days, List<Double> sums) {
+    public CalendarGridAdapter(Context context, List<String> days, List<Double> sums, List<Boolean> isCurrentMonth) {
         this.context = context;
         this.days = days;
         this.sums = sums;
+        this.isCurrentMonth = isCurrentMonth;
     }
 
     @Override public int getCount() { return days.size(); }
@@ -36,6 +37,13 @@ public class CalendarGridAdapter extends BaseAdapter {
 
         String day = days.get(position);
         tvDay.setText(day);
+
+        boolean inCurrentMonth = isCurrentMonth.get(position);
+        if (!inCurrentMonth) {
+            tvDay.setTextColor(Color.parseColor("#9E9E9E")); // Gray color for other months
+        } else {
+            tvDay.setTextColor(Color.parseColor("#000000")); // Black color for current month
+        }
 
         if (day.isEmpty()) {
             tvDay.setText("");

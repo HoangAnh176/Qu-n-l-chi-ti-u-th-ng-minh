@@ -41,6 +41,11 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
         notifyDataSetChanged();
     }
 
+    public void setSelectedPos(int pos) {
+        this.selectedPos = pos;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -106,4 +111,3 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
         }
     }
 }
-

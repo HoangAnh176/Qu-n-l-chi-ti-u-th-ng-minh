@@ -75,16 +75,15 @@
                     android:textStyle="bold"
                     android:textColor="#333333"
                     android:textSize="18sp"/>
-                <TextView
+                <ImageView
                     android:id="@+id/tv_prev_date"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:text="&lt;"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_back"
+                    app:tint="#555555"
                     android:gravity="center"
                     android:layout_marginEnd="6dp"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#555555"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="@drawable/bg_btn_date"/>
@@ -99,16 +98,15 @@
                     android:textColor="#333333"
                     android:textSize="18sp"
                     android:textStyle="bold"/>
-                <TextView
+                <ImageView
                     android:id="@+id/tv_next_date"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:text="&gt;"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_next"
+                    app:tint="#555555"
                     android:gravity="center"
                     android:layout_marginStart="6dp"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#555555"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="@drawable/bg_btn_date"/>

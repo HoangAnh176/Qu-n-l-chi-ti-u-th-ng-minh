@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_input" android:icon="@drawable/ic_outline_restaurant" android:title="Nhập vào" />
+    <item android:id="@+id/nav_input" android:icon="@drawable/ic_outline_brush" android:title="Nhập vào" />
     <item android:id="@+id/nav_calendar" android:icon="@drawable/ic_outline_pets" android:title="Lịch" />
     <item android:id="@+id/nav_report" android:icon="@drawable/iccoin" android:title="Báo cáo" />
     <item android:id="@+id/nav_budget" android:icon="@drawable/icwallet" android:title="Ngân sách" />

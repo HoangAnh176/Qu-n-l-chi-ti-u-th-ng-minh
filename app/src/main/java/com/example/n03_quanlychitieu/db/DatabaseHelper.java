@@ -368,10 +368,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (userId == null) return list;
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String query = "SELECT e.expense_id as id, e.amount, e.description, e.create_at, 'expense' as type, c.name, c.icon, e.category_id, e.budget_id " +
+        String query = "SELECT e.expense_id as id, e.amount, e.description, e.create_at, 'expense' as type, c.name, c.icon, c.color, e.category_id, e.budget_id " +
                        "FROM Expenses e LEFT JOIN Categories c ON e.category_id = c.category_id WHERE e.user_id = ? AND e.create_at >= ? AND e.create_at <= ? " +
                        "UNION ALL " +
-                       "SELECT i.income_id as id, i.amount, i.description, i.create_at, 'income' as type, c.name, c.icon, i.category_id, NULL as budget_id " +
+                       "SELECT i.income_id as id, i.amount, i.description, i.create_at, 'income' as type, c.name, c.icon, c.color, i.category_id, NULL as budget_id " +
                        "FROM Incomes i LEFT JOIN Categories c ON i.category_id = c.category_id WHERE i.user_id = ? AND i.create_at >= ? AND i.create_at <= ? " +
                        "ORDER BY create_at DESC";
 
@@ -384,9 +384,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 cursor.getString(3),
                 cursor.getString(4),
                 cursor.getString(5), // category name
-                cursor.getString(6),  // category icon
-                cursor.getString(7),  // category id
-                cursor.getString(8)   // budget id
+                cursor.getString(6), // category icon
+                cursor.getString(7), // category color
+                cursor.getString(8), // category id
+                cursor.getString(9)  // budget id
             ));
         }
         if (cursor != null) cursor.close();

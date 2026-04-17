@@ -51,6 +51,8 @@ public class ReportTransaction extends AppCompatActivity {
     private boolean isExpenseTab = true;
     private Date currentStartDate;
     private Date currentEndDate;
+    private boolean isInitialLoad = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +65,16 @@ public class ReportTransaction extends AppCompatActivity {
         setupListeners();
         updateDateRange(); // Tính toán currentStartDate và currentEndDate
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isInitialLoad) {
+            refreshData();
+        }
+        isInitialLoad = false;
+    }
+
     private void initViews() {
         tvTotalIncome = findViewById(R.id.tv_total_income);
         tvTotalExpense = findViewById(R.id.tv_total_expense);

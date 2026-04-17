@@ -51,6 +51,8 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private AuthenticationManager authManager;
     private DatabaseHelper dbHelper;
 
+    private boolean isInitialLoad = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +72,16 @@ public class CategoryDetailActivity extends AppCompatActivity {
         initViews();
         setupChart();
         loadData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isInitialLoad) {
+            setupChart();
+            loadData();
+        }
+        isInitialLoad = false;
     }
 
     private void initViews() {
@@ -122,8 +134,9 @@ public class CategoryDetailActivity extends AppCompatActivity {
             String userId = authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUser_id() : "";
             SQLiteDatabase db = dbHelper.getReadableDatabase();
             String table = isExpense ? "expenses" : "incomes";
+            String idVal = isExpense ? "expense_id" : "income_id";
 
-            String query = "SELECT e.amount, e.create_at, c.icon FROM " + table + " e " +
+            String query = "SELECT e.amount, e.create_at, c.icon, e." + idVal + ", e.description, e.category_id FROM " + table + " e " +
                     "JOIN categories c ON e.category_id = c.category_id " +
                     "WHERE e.user_id = ? AND e.category_id = ?";
             Cursor c = db.rawQuery(query, new String[]{userId, categoryId});
@@ -149,6 +162,9 @@ public class CategoryDetailActivity extends AppCompatActivity {
                 double amount = c.getDouble(0);
                 String dateStr = c.getString(1);
                 String icon = c.getString(2);
+                String transId = c.getString(3);
+                String desc = c.getString(4);
+                String catId = c.getString(5);
 
                 Date transDate = parseDate(dateStr);
                 if (transDate == null) continue;
@@ -177,8 +193,8 @@ public class CategoryDetailActivity extends AppCompatActivity {
                     listTotalAmount += amount;
                     
                     if (!isYearlyMode) {
-                       String dStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(transDate);
-                       items.add(new CategoryDetailAdapter.DetailItem(dStr, amount, categoryName, icon));
+                       String listDateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(transDate);
+                       items.add(new CategoryDetailAdapter.DetailItem(listDateStr, amount, categoryName, icon, transId, desc, catId, dateStr));
                     }
                 }
             }
@@ -268,8 +284,10 @@ public class CategoryDetailActivity extends AppCompatActivity {
                 }
 
                 CategoryDetailAdapter adapter = new CategoryDetailAdapter(this, finalItems, isYearlyMode, colorStr);
-                if (isYearlyMode) {
-                    adapter.setOnItemClickListener(month -> {
+                adapter.setOnItemClickListener(new CategoryDetailAdapter.OnItemClickListener() {
+                    @Override
+                    public void onMonthItemClick(int month) {
+                        if (!isYearlyMode) return;
                         Calendar clickCal = Calendar.getInstance();
                         clickCal.setTimeInMillis(currentStartDate);
                         
@@ -295,8 +313,28 @@ public class CategoryDetailActivity extends AppCompatActivity {
                         intent.putExtra("currentStartDate", newStart);
                         intent.putExtra("currentEndDate", newEnd);
                         startActivity(intent);
-                    });
-                }
+                    }
+
+                    @Override
+                    public void onTransactionClick(CategoryDetailAdapter.DetailItem item) {
+                        if (!isYearlyMode && item.id != null) {
+                            Intent intent;
+                            if (isExpense) {
+                                intent = new Intent(CategoryDetailActivity.this, com.example.n03_quanlychitieu.ui.expense.UpdateExpenseActivity.class);
+                                intent.putExtra("expenseID", item.id);
+                            } else {
+                                intent = new Intent(CategoryDetailActivity.this, com.example.n03_quanlychitieu.ui.income.UpdateIncomeActivity.class);
+                                intent.putExtra("incomeID", item.id);
+                            }
+                            intent.putExtra("amount", String.valueOf((int)item.amount));
+                            intent.putExtra("date", item.rawDate != null ? item.rawDate : item.dateStr);
+                            intent.putExtra("categoryId", item.catId);
+                            intent.putExtra("description", item.desc);
+                            intent.putExtra("position", -1);
+                            startActivityForResult(intent, 100);
+                        }
+                    }
+                });
                 rvDetails.setAdapter(adapter);
             });
 
@@ -313,6 +351,14 @@ public class CategoryDetailActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            // Already handled by onResume
         }
     }
 }

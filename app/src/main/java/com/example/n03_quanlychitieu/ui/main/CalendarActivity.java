@@ -18,6 +18,7 @@ import com.example.n03_quanlychitieu.ui.expense.UpdateExpenseActivity;
 import com.example.n03_quanlychitieu.ui.income.UpdateIncomeActivity;
 import com.example.n03_quanlychitieu.ui.user.UserProfileActivity;
 import com.example.n03_quanlychitieu.utils.AuthenticationManager;
+import com.example.n03_quanlychitieu.utils.ExpandableHeightGridView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
@@ -25,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CalendarActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
     private TextView tvTitle, tvMonthYear, tvTotalIncome, tvTotalExpense, tvTotalAll;
     private ImageView ivPrevMonth, ivNextMonth;
-    private GridView gvCalendar;
+    private ExpandableHeightGridView gvCalendar;
     private RecyclerView rvTransactions;
     private Calendar currentCalendar;
     private DatabaseHelper dbHelper;
@@ -66,6 +69,7 @@ public class CalendarActivity extends AppCompatActivity {
         ivPrevMonth = findViewById(R.id.iv_prev_month);
         ivNextMonth = findViewById(R.id.iv_next_month);
         gvCalendar = findViewById(R.id.gv_calendar);
+        gvCalendar.setExpanded(true);
         rvTransactions = findViewById(R.id.rv_transactions);
         tvTotalIncome = findViewById(R.id.tv_total_income);
         tvTotalExpense = findViewById(R.id.tv_total_expense);
@@ -129,9 +133,16 @@ public class CalendarActivity extends AppCompatActivity {
 
         List<String> days = new ArrayList<>();
         List<Double> sums = new ArrayList<>();
+        List<Boolean> isCurrentMonth = new ArrayList<>();
+        
+        Calendar prevMonthCal = (Calendar) currentCalendar.clone();
+        prevMonthCal.add(Calendar.MONTH, -1);
+        int daysInPrevMonth = prevMonthCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
         for (int i = 0; i < offset; i++) {
-            days.add("");
+            days.add(0, String.valueOf(daysInPrevMonth - i));
             sums.add(0.0);
+            isCurrentMonth.add(0, false);
         }
 
         double totalIncome = 0;
@@ -166,10 +177,53 @@ public class CalendarActivity extends AppCompatActivity {
                 }
             }
             sums.add(daySum);
+            isCurrentMonth.add(true);
         }
 
-        gvCalendar.setAdapter(new CalendarGridAdapter(this, days, sums));
-        rvTransactions.setAdapter(new TransactionAdapter(monthTransactions, transaction -> {
+        int remainingCells = 42 - days.size();
+        if (remainingCells >= 7 && days.size() <= 35) {
+            remainingCells -= 7; // If only 5 rows needed, don't show the 6th row padding
+        }
+        for (int i = 1; i <= remainingCells; i++) {
+            days.add(String.valueOf(i));
+            sums.add(0.0);
+            isCurrentMonth.add(false);
+        }
+
+        gvCalendar.setAdapter(new CalendarGridAdapter(this, days, sums, isCurrentMonth));
+        Map<String, List<Transaction>> groupedByDate = new java.util.HashMap<>();
+        for (Transaction t : monthTransactions) {
+            String dayStr = t.date != null && t.date.length() >= 10 ? t.date.substring(0, 10) : "";
+            if (!groupedByDate.containsKey(dayStr)) {
+                groupedByDate.put(dayStr, new ArrayList<>());
+            }
+            groupedByDate.get(dayStr).add(t);
+        }
+
+        List<TransactionAdapter.ListItem> flattenedList = new ArrayList<>();
+        List<String> sortedDates = new ArrayList<>(groupedByDate.keySet());
+        sortedDates.sort((a, b) -> b.compareTo(a));
+
+        for (String dateKey : sortedDates) {
+            List<Transaction> dailyTrans = groupedByDate.get(dateKey);
+            double dailyTotal = 0;
+            for (Transaction t : dailyTrans) {
+                if (t.type.equals("income")) dailyTotal += t.amount;
+                else dailyTotal -= t.amount;
+            }
+
+            String headerTitle = dateKey;
+            if (dateKey.length() == 10) {
+                headerTitle = dateKey.substring(8, 10) + "/" + dateKey.substring(5, 7);
+            }
+            flattenedList.add(new TransactionAdapter.HeaderItem(headerTitle, dailyTotal));
+
+            for (Transaction t : dailyTrans) {
+                flattenedList.add(new TransactionAdapter.TransactionItem(t));
+            }
+        }
+
+        rvTransactions.setAdapter(new TransactionAdapter(flattenedList, transaction -> {
             if (transaction.type.equals("expense")) {
                 Intent intent = new Intent(CalendarActivity.this, UpdateExpenseActivity.class);
                 intent.putExtra("expenseID", transaction.id);

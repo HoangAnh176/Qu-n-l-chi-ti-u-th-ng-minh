@@ -41,7 +41,7 @@
         </RadioGroup>
         <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="0dp"/>
     </LinearLayout>
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_nav"
@@ -78,14 +78,13 @@
                     android:textSize="18sp"
                     android:textColor="#333"
                     android:textStyle="bold"/>
-                <TextView
+                <ImageView
                     android:id="@+id/btn_next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="&gt;"
-                    android:textSize="20sp"
-                    android:padding="8dp"
-                    android:textColor="#666"/>
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_next"
+                    app:tint="#666" />
             </LinearLayout>
             <!-- Summary Block -->
             <LinearLayout
@@ -159,7 +158,7 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"/>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
