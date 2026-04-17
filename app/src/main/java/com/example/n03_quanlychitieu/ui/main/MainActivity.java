@@ -110,6 +110,12 @@ public class MainActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
+            } else if (item.getItemId() == R.id.nav_report) {
+                Intent intent = new Intent(MainActivity.this, com.example.n03_quanlychitieu.ui.sign.ReportTransaction.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
             } else if (item.getItemId() == R.id.nav_more) {
                 Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
                 intent.putExtra("userId", userId);

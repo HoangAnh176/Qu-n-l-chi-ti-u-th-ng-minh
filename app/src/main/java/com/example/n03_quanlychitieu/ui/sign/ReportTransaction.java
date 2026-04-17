@@ -1,311 +1,308 @@
 package com.example.n03_quanlychitieu.ui.sign;
-
-import android.content.pm.PackageManager;
-import android.graphics.Canvas;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.pdf.PdfDocument;
-import android.media.MediaScannerConnection;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Environment;
-import android.view.View;
-import android.widget.ImageButton;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.util.Pair;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.n03_quanlychitieu.R;
-import com.example.n03_quanlychitieu.dao.ReportDAO;
+import com.example.n03_quanlychitieu.adapter.ReportCategoryAdapter;
 import com.example.n03_quanlychitieu.db.DatabaseHelper;
-
+import com.example.n03_quanlychitieu.ui.main.CalendarActivity;
+import com.example.n03_quanlychitieu.ui.main.MainActivity;
+import com.example.n03_quanlychitieu.ui.user.UserProfileActivity;
 import com.example.n03_quanlychitieu.utils.AuthenticationManager;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.google.android.material.datepicker.MaterialDatePicker;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.tabs.TabLayout;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
+import java.util.Map;
 public class ReportTransaction extends AppCompatActivity {
-    private TextView tvTotalIncome, tvTotalExpense, tvBalance;
-    private PieChart chartSummary;
-    private ReportDAO reportDAO;
+    private TextView tvTotalIncome, tvTotalExpense, tvBalance, tvDateRange;
+    private PieChart pieChart;
+    private RecyclerView rvCategories;
+    private TabLayout tabLayout;
+    private RadioGroup rgReportType;
+    private BottomNavigationView bottomNav;
     private AuthenticationManager authManager;
-    private static final int REQUEST_WRITE_STORAGE = 112;
-    private Date currentStartDate, currentEndDate;
-    private ImageButton btn_back, btn_download;
-
+    private DatabaseHelper dbHelper;
+    private Calendar currentCal = Calendar.getInstance();
+    private boolean isYearlyMode = false;
+    private boolean isExpenseTab = true;
+    private Date currentStartDate;
+    private Date currentEndDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_financial_report);
-
-        // Khởi tạo các view
-        initViews();
-
-        // Khởi tạo các đối tượng cần thiết
         authManager = AuthenticationManager.getInstance(this);
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        reportDAO = new ReportDAO(dbHelper.getWritableDatabase());
-        btn_back = findViewById(R.id.btn_back_report);
-        btn_download = findViewById(R.id.btn_download);
-
-        btn_download.setOnClickListener(v -> downloadReport());
-
-        // Thiết lập sự kiện click
-        setupClickListeners();
-
-        // Load dữ liệu mặc định (hôm nay)
-        loadTodayData();
-
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        dbHelper = new DatabaseHelper(this);
+        initViews();
+        setupBottomNav();
+        setupPieChart();
+        setupListeners();
+        updateDateRange(); // Tính toán currentStartDate và currentEndDate
     }
-
-    private void downloadReport() {
-        // lay du lieu tu cac TextView hien thi giao dien
-        String totalIncome = tvTotalIncome.getText().toString();
-        String totalExpense = tvTotalExpense.getText().toString();
-        String balance = tvBalance.getText().toString();
-
-        // Tao tren file voi dinh dang: BaoCao_ngay_thang_nam.pdf
-        SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy", Locale.getDefault());
-        String fileName = "BaoCao_" + sdf.format(new Date()) + ".pdf";
-
-        // Tao va lưu file bao cao
-        createdPdfReport(fileName, totalIncome, totalExpense, balance);
-
-        // Thong bao cho nguoi dung
-        Toast.makeText(this, "Đã tải báo cáo thành công", Toast.LENGTH_SHORT).show();
-    }
-
-    private void createdPdfReport(String fileName, String income, String expense, String balance) {
-        // Tao doi tuong PdfDocument
-        PdfDocument document = new PdfDocument();
-
-        // Tao mot trang
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
-        PdfDocument.Page page = document.startPage(pageInfo);
-
-        // Lay Canvas de ve noi dung
-        Canvas canvas = page.getCanvas();
-        Paint paint = new Paint();
-
-        // Vẽ tiêu đề
-        paint.setTextSize(24f);
-        paint.setColor(Color.BLACK);
-        canvas.drawText("BÁO CÁO TÀI CHÍNH", 100, 100, paint);
-
-        // Vẽ thông tin tổng thu
-        paint.setTextSize(18f);
-        canvas.drawText("Tổng thu: " + income, 100, 150, paint);
-
-        // Vẽ thông tin tổng chi
-        canvas.drawText("Tổng chi: " + expense, 100, 200, paint);
-
-        // Vẽ thông tin số dư
-        canvas.drawText("Số dư: " + balance, 100, 250, paint);
-
-        // Vẽ ngày tạo báo cáo
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        String currentDate = sdf.format(new Date());
-        canvas.drawText("Ngày tạo: " + currentDate, 100, 300, paint);
-
-        // Kết thúc trang
-        document.finishPage(page);
-
-        // Lưu file vào thư mục Downloads
-        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(downloadsDir, fileName);
-
-        try {
-            document.writeTo(new FileOutputStream(file));
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
-        } finally {
-            document.close();
-        }
-
-        // Thông báo hệ thống về file mới
-        MediaScannerConnection.scanFile(
-                this,
-                new String[]{file.getAbsolutePath()},
-                null,
-                null
-        );
-
-    }
-
-    // Kiểm tra quyền trước khi tạo PDF
-    private void checkPermissionAndGeneratePDF() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_WRITE_STORAGE);
-        } else {
-            generatePDF();
-        }
-    }
-
-    // Tạo và lưu file PDF
-    private void generatePDF() {
-        String userId = authManager.getCurrentUser().getUser_id();
-
-        // Lấy dữ liệu hiện tại
-        double totalIncome = reportDAO.getTotalIncome(userId, currentStartDate, currentEndDate);
-        double totalExpense = reportDAO.getTotalExpense(userId, currentStartDate, currentEndDate);
-        double balance = totalIncome - totalExpense;
-
-        // Tạo tên file với timestamp
-        String fileName = "BaoCao_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date()) + ".pdf";
-
-        // Gọi PDFGenerator để tạo file
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_WRITE_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                generatePDF();
-            } else {
-                Toast.makeText(this, "Cần cấp quyền để lưu báo cáo", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     private void initViews() {
         tvTotalIncome = findViewById(R.id.tv_total_income);
         tvTotalExpense = findViewById(R.id.tv_total_expense);
         tvBalance = findViewById(R.id.tv_balance);
-        chartSummary = findViewById(R.id.chart_summary);
+        tvDateRange = findViewById(R.id.tv_date_range);
+        pieChart = findViewById(R.id.pieChart);
+        rvCategories = findViewById(R.id.rv_report_categories);
+        tabLayout = findViewById(R.id.tab_layout);
+        rgReportType = findViewById(R.id.rg_report_type);
+        bottomNav = findViewById(R.id.bottom_nav);
+        rvCategories.setLayoutManager(new LinearLayoutManager(this));
+    }
+    private void setupListeners() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                isExpenseTab = tab.getPosition() == 0;
+                refreshData();
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+        rgReportType.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton rbMonthly = findViewById(R.id.rb_monthly);
+            RadioButton rbYearly = findViewById(R.id.rb_yearly);
+            if (checkedId == R.id.rb_monthly) {
+                rbMonthly.setBackgroundColor(Color.parseColor("#FF9800"));
+                rbMonthly.setTextColor(Color.WHITE);
+                rbYearly.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                rbYearly.setTextColor(Color.parseColor("#FF9800"));
+            } else {
+                rbYearly.setBackgroundColor(Color.parseColor("#FF9800"));
+                rbYearly.setTextColor(Color.WHITE);
+                rbMonthly.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                rbMonthly.setTextColor(Color.parseColor("#FF9800"));
+            }
+            isYearlyMode = (checkedId == R.id.rb_yearly);
+            updateDateRange();
+        });
+        findViewById(R.id.btn_prev).setOnClickListener(v -> {
+            if (isYearlyMode) currentCal.add(Calendar.YEAR, -1);
+            else currentCal.add(Calendar.MONTH, -1);
+            updateDateRange();
+        });
+        findViewById(R.id.btn_next).setOnClickListener(v -> {
+            if (isYearlyMode) currentCal.add(Calendar.YEAR, 1);
+            else currentCal.add(Calendar.MONTH, 1);
+            updateDateRange();
+        });
+
+    }
+    private void updateDateRange() {
+        Calendar cal = (Calendar) currentCal.clone();
+        if (isYearlyMode) {
+            String yearStr = new SimpleDateFormat("yyyy", Locale.getDefault()).format(cal.getTime());
+            tvDateRange.setText("Năm " + yearStr);
+            cal.set(Calendar.MONTH, Calendar.JANUARY);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0);
+            currentStartDate = cal.getTime();
+            cal.set(Calendar.MONTH, Calendar.DECEMBER);
+            cal.set(Calendar.DAY_OF_MONTH, 31);
+            cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59);
+            currentEndDate = cal.getTime();
+        } else {
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0);
+            currentStartDate = cal.getTime();
+            int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            String title = new SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(cal.getTime());
+            tvDateRange.setText(title + " (01/" + new SimpleDateFormat("MM", Locale.getDefault()).format(cal.getTime()) + " - " + maxDay + "/" + new SimpleDateFormat("MM", Locale.getDefault()).format(cal.getTime()) + ")");
+            cal.set(Calendar.DAY_OF_MONTH, maxDay);
+            cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59);
+            currentEndDate = cal.getTime();
+        }
+        refreshData();
+    }
+    private void refreshData() {
+        new Thread(() -> {
+            String userId = authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUser_id() : "";
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            // Tổng Chi
+            Map<String, CategorySum> expenseMap = getAggregated(db, userId, "expenses");
+            double totalExpense = 0;
+            for (CategorySum cs : expenseMap.values()) totalExpense += cs.amount;
+            // Tổng Thu
+            Map<String, CategorySum> incomeMap = getAggregated(db, userId, "incomes");
+            double totalIncome = 0;
+            for (CategorySum cs : incomeMap.values()) totalIncome += cs.amount;
+            double balance = totalIncome - totalExpense;
+            // Lấy data cho List/Chart dựa trên Tab hiện tại
+            Map<String, CategorySum> activeMap = isExpenseTab ? expenseMap : incomeMap;
+            double activeTotal = isExpenseTab ? totalExpense : totalIncome;
+            List<CategorySum> results = new ArrayList<>(activeMap.values());
+            results.sort((a,b) -> Double.compare(b.amount, a.amount));
+            final double fExp = totalExpense;
+            final double fInc = totalIncome;
+            final double fBal = balance;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                NumberFormat fmt = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                tvTotalExpense.setText("-" + fmt.format(fExp).replace("-",""));
+                tvTotalIncome.setText("+" + fmt.format(fInc).replace("+",""));
+                String balStr = fmt.format(Math.abs(fBal));
+                tvBalance.setText((fBal < 0 ? "-" : (fBal > 0 ? "+" : "")) + balStr);
+                updateChartAndList(results, activeTotal);
+            });
+        }).start();
+    }
+    private Map<String, CategorySum> getAggregated(SQLiteDatabase db, String userId, String table) {
+        Map<String, CategorySum> map = new HashMap<>();
+        String query = "SELECT c.category_id, c.name, e.amount, e.create_at, c.color, c.icon FROM " + table + " e " +
+                       "JOIN categories c ON e.category_id = c.category_id " +
+                       "WHERE e.user_id = ?";
+        Cursor c = db.rawQuery(query, new String[]{userId});
+        while (c.moveToNext()) {
+            String catId = c.getString(0);
+            String name = c.getString(1);
+            double amount = c.getDouble(2);
+            String dateStr = c.getString(3);
+            String color = c.getString(4);
+            String icon = c.getString(5);
+            if (color == null || color.isEmpty()) color = (table.equals("expenses") ? "#E67E22" : "#3498DB");
+
+            if (isDateInRange(dateStr)) {
+                CategorySum cs = map.getOrDefault(name, new CategorySum(catId, name, 0, color, icon));
+                cs.amount += amount;
+                map.put(name, cs);
+            }
+        }
+        c.close();
+        return map;
     }
 
-    private void setupClickListeners() {
-
-        // Các nút lọc thời gian
-        findViewById(R.id.btn_today).setOnClickListener(v -> loadTodayData());
-        findViewById(R.id.btn_week).setOnClickListener(v -> loadWeekData());
-        findViewById(R.id.btn_month).setOnClickListener(v -> loadMonthData());
-        findViewById(R.id.btn_custom).setOnClickListener(v -> showCustomDateDialog());
+    private boolean isDateInRange(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return false;
+        try {
+            Date d;
+            if (dateStr.contains("T")) {
+                d = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(dateStr);
+            } else {
+                d = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr);
+            }
+            if (d == null) return false;
+            return !d.before(currentStartDate) && !d.after(currentEndDate);
+        } catch (Exception e) {
+            return false;
+        }
     }
+    private void updateChartAndList(List<CategorySum> results, double total) {
+        List<PieEntry> entries = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+        List<ReportCategoryAdapter.CategoryReportItem> items = new ArrayList<>();
+        for (CategorySum cs : results) {
+            String shortName = cs.name;
+            if (shortName != null && shortName.length() > 10) {
+                shortName = shortName.substring(0, 9) + "...";
+            }
+            entries.add(new PieEntry((float)cs.amount, shortName, cs.name));
+            try { colors.add(Color.parseColor(cs.color)); }
+            catch(Exception e) { colors.add(Color.GRAY); }
+            double percent = total > 0 ? (cs.amount / total * 100) : 0;
+            items.add(new ReportCategoryAdapter.CategoryReportItem(cs.catId, cs.name, cs.amount, percent, cs.color, cs.icon));
+        }
+        if (entries.isEmpty()) {
+            pieChart.setData(null);
+            pieChart.invalidate();
+        } else {
+            PieDataSet dataSet = new PieDataSet(entries, "");
+            dataSet.setColors(colors);
+            dataSet.setSliceSpace(2f);
+            dataSet.setDrawValues(false);
+            dataSet.setSelectionShift(0f); // Tắt hiệu ứng zoom to khi bấm
 
-    private void loadTodayData() {
-        currentStartDate = reportDAO.getStartOfDay(new Date());
-        currentEndDate = reportDAO.getEndOfDay(new Date());
+            PieData data = new PieData(dataSet);
+            pieChart.setData(data);
 
-        loadDataForDateRange();
+            // Cài đặt Tooltip
+            CustomMarkerView mv = new CustomMarkerView(this, R.layout.custom_marker_view, total);
+            mv.setChartView(pieChart);
+            pieChart.setMarker(mv);
+
+            pieChart.invalidate();
+        }
+        ReportCategoryAdapter adapter = new ReportCategoryAdapter(this, items);
+        adapter.setOnItemClickListener(item -> {
+            Intent intent = new Intent(ReportTransaction.this, CategoryDetailActivity.class);
+            intent.putExtra("categoryId", item.categoryId);
+            intent.putExtra("categoryName", item.name);
+            intent.putExtra("color", item.color);
+            intent.putExtra("isExpense", isExpenseTab);
+            intent.putExtra("isYearlyMode", isYearlyMode);
+            intent.putExtra("currentStartDate", currentStartDate.getTime());
+            intent.putExtra("currentEndDate", currentEndDate.getTime());
+            startActivity(intent);
+        });
+        rvCategories.setAdapter(adapter);
     }
-
-    private void loadWeekData() {
-        Date[] weekRange = reportDAO.getCurrentWeekRange();
-        currentStartDate = weekRange[0];
-        currentEndDate = weekRange[1];
-
-        loadDataForDateRange();
-    }
-
-    private void loadMonthData() {
-        Date[] monthRange = reportDAO.getCurrentMonthRange();
-        currentStartDate = monthRange[0];
-        currentEndDate = monthRange[1];
-
-        loadDataForDateRange();
-    }
-
-    private void showCustomDateDialog() {
-        MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
-        builder.setTitleText("Chọn khoảng thời gian");
-
-        // Thiết lập ngày hiện tại làm phạm vi mặc định
-        Calendar calendar = Calendar.getInstance();
-        long today = calendar.getTimeInMillis();
-        calendar.add(Calendar.DAY_OF_MONTH, -7); // Mặc định chọn 7 ngày gần nhất
-        long oneWeekAgo = calendar.getTimeInMillis();
-
-        builder.setSelection(Pair.create(oneWeekAgo, today));
-
-        MaterialDatePicker<Pair<Long, Long>> picker = builder.build();
-        picker.show(getSupportFragmentManager(), "DATE_PICKER");
-
-        // Xử lý khi chọn ngày xong
-        picker.addOnPositiveButtonClickListener(selection -> {
-            currentStartDate = new Date(selection.first);
-            currentEndDate = new Date(selection.second);
-
-            loadDataForDateRange();
+    private void setupBottomNav() {
+        bottomNav.setSelectedItemId(R.id.nav_report);
+        bottomNav.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_input) {
+                startActivity(new Intent(ReportTransaction.this, MainActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (item.getItemId() == R.id.nav_calendar) {
+                startActivity(new Intent(ReportTransaction.this, CalendarActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (item.getItemId() == R.id.nav_more) {
+                String userId = authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUser_id() : null;
+                Intent intent = new Intent(ReportTransaction.this, UserProfileActivity.class);
+                intent.putExtra("userId", userId);
+                startActivity(intent);
+                return true;
+            }
+            return true;
         });
     }
-
-    private void loadDataForDateRange() {
-        String userId = authManager.getCurrentUser().getUser_id();
-
-        // Tính tổng thu, tổng chi
-        double totalIncome = reportDAO.getTotalIncome(userId, currentStartDate, currentEndDate);
-        double totalExpense = reportDAO.getTotalExpense(userId, currentStartDate, currentEndDate);
-        double balance = totalIncome - totalExpense;
-
-
-        // Hiển thị tổng quan
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        tvTotalIncome.setText(currencyFormat.format(totalIncome));
-//        tvTotalIncome.setText(currentEndDate.toString());
-        tvTotalExpense.setText(currencyFormat.format(totalExpense));
-        tvBalance.setText(currencyFormat.format(balance));
-
-        // Vẽ biểu đồ
-        setupPieChart(totalIncome, totalExpense);
-
+    private void setupPieChart() {
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleColor(Color.WHITE);
+        pieChart.setTransparentCircleRadius(60f);
+        pieChart.setHoleRadius(50f);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.getLegend().setEnabled(false); 
+        pieChart.setDrawEntryLabels(true);
+        pieChart.setEntryLabelTextSize(14f);
+        pieChart.setEntryLabelColor(Color.WHITE);
+        pieChart.setEntryLabelTypeface(Typeface.DEFAULT);
+        pieChart.setExtraOffsets(5f, 5f, 5f, 5f);
+        pieChart.setNoDataText("Không có dữ liệu trong khoảng thời gian này");
     }
-
-    private void setupPieChart(double income, double expense) {
-        List<PieEntry> entries = new ArrayList<>();
-        if (income > 0) entries.add(new PieEntry((float) income, "Income"));
-        if (expense > 0) entries.add(new PieEntry((float) expense, "Expense"));
-
-        if (entries.isEmpty()) {
-            chartSummary.setVisibility(View.GONE);
-            return;
-        }
-
-        chartSummary.setVisibility(View.VISIBLE);
-
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(new int[]{Color.parseColor("#4CAF50"), Color.parseColor("#F44336")});
-        dataSet.setValueTextSize(12f);
-
-        PieData data = new PieData(dataSet);
-        chartSummary.setData(data);
-        chartSummary.getDescription().setEnabled(false);
-        chartSummary.getLegend().setEnabled(true);
-        chartSummary.setEntryLabelColor(Color.BLACK);
-        chartSummary.setHoleRadius(40f);
-        chartSummary.setTransparentCircleRadius(45f);
-        chartSummary.animateY(1000);
-        chartSummary.invalidate();
+    class CategorySum {
+        String catId;
+        String name;
+        double amount;
+        String color;
+        String icon;
+        CategorySum(String id, String n, double a, String c, String i) { catId = id; name = n; amount = a; color = c; icon = i; }
     }
-
-
 }

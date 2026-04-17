@@ -81,6 +81,11 @@ public class CalendarActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
+            } else if (itemId == R.id.nav_report) {
+                startActivity(new Intent(CalendarActivity.this, com.example.n03_quanlychitieu.ui.sign.ReportTransaction.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
             } else if (itemId == R.id.nav_more) {
                 startActivity(new Intent(CalendarActivity.this, UserProfileActivity.class));
                 overridePendingTransition(0, 0);
