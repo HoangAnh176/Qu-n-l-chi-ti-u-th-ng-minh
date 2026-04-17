@@ -238,10 +238,10 @@ public class CalendarActivity extends AppCompatActivity {
             } else if (transaction.type.equals("income")) {
                 Intent intent = new Intent(CalendarActivity.this, UpdateIncomeActivity.class);
                 intent.putExtra("userId", userId);
-                intent.putExtra("incomeId", transaction.id);
+                intent.putExtra("incomeID", transaction.id);
                 intent.putExtra("categoryId", transaction.categoryId);
                 intent.putExtra("amount", String.valueOf(transaction.amount));
-                intent.putExtra("source", transaction.description);
+                intent.putExtra("description", transaction.description);
                 intent.putExtra("date", transaction.date);
                 startActivity(intent);
             }

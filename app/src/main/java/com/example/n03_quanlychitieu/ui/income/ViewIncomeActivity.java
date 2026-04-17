@@ -141,11 +141,12 @@ public class ViewIncomeActivity extends AppCompatActivity {
                 Income income = incomeList.get(selectedPosition);
                 Intent intent = new Intent(this, UpdateIncomeActivity.class);
                 intent.putExtra("userId", userId);
-                intent.putExtra("incomeId", income.id);
+                intent.putExtra("incomeID", income.id);
                 intent.putExtra("amount", income.amount);
-                intent.putExtra("source", income.source);
+                intent.putExtra("description", income.source);
                 intent.putExtra("date", income.date);
                 intent.putExtra("categoryId", income.categoryId);
+                intent.putExtra("position", selectedPosition);
                 startActivityForResult(intent, REQUEST_CODE_UPDATE_INCOME);
             }
             return true;
