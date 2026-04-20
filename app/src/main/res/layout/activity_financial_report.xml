@@ -60,14 +60,14 @@
                 android:padding="12dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="8dp">
-                <TextView
+
+                <ImageView
                     android:id="@+id/btn_prev"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="&lt;"
-                    android:textSize="20sp"
-                    android:padding="8dp"
-                    android:textColor="#666"/>
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_back"
+                    app:tint="#666" />
                 <TextView
                     android:id="@+id/tv_date_range"
                     android:layout_width="0dp"
@@ -166,7 +166,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@android:color/white"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="#FF9800"
-        app:itemTextColor="#FF9800"/>
+        app:itemIconTint="@color/bottom_nav_colors"
+        app:itemTextColor="@color/bottom_nav_colors"
+        app:menu="@menu/bottom_nav_menu" />
 </RelativeLayout>

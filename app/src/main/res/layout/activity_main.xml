@@ -224,8 +224,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        app:itemIconTint="#757575"
-        app:itemTextColor="#757575"
+        app:itemIconTint="@color/bottom_nav_colors"
+        app:itemTextColor="@color/bottom_nav_colors"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

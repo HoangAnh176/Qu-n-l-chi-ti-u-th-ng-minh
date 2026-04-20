@@ -39,7 +39,8 @@ public class UpdateIncomeActivity extends AppCompatActivity {
     private Categories selectedCategory = null;
     private Calendar selectedCalendar = Calendar.getInstance();
     private SimpleDateFormat dispFmt = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private SimpleDateFormat isoFmt = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss", Locale.getDefault());
+    private SimpleDateFormat isoFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
