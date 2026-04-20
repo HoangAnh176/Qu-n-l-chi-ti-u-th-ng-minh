@@ -49,6 +49,7 @@
         <activity android:name=".ui.sign.ReportTransaction"/>
         <activity android:name=".ui.sign.CategoryDetailActivity"/>
         <activity android:name=".ui.sign.SetBudgets"/>
+        <activity android:name=".ui.budget.BudgetActivity"/>
         <activity android:name=".ui.sign.ForgotPassword"/>
 <!--        Google-->
         <meta-data

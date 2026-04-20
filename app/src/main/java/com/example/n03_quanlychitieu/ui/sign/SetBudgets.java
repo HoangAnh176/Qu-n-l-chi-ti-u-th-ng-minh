@@ -48,6 +48,7 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
     private String currentUserId;
     private TextInputEditText etAmount, etStartDate, etEndDate, etDescription;
     private AutoCompleteTextView actvCategory;
+    private com.google.android.material.textfield.TextInputLayout tilCategory;
     private MaterialButton btnSave;
     private RecyclerView rvBudgets;
     private View emptyView;
@@ -114,6 +115,7 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
     }
 
     private void initViews() {
+        tilCategory = findViewById(R.id.til_category);
         actvCategory = findViewById(R.id.actv_category);
         etAmount = findViewById(R.id.et_amount);
         etStartDate = findViewById(R.id.et_start_date);
@@ -173,8 +175,15 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
     }
 
     private void setupCategoryDropdown() {
-        categories = categoryDAO.getAllCategories(currentUserId);
+        List<Categories> allCats = categoryDAO.getAllCategories(currentUserId);
+        categories.clear();
+        categories.add(new Categories("none", "Tổng ngân sách", "", "#000000", "expense", currentUserId));
         List<String> categoryNames = new ArrayList<>();
+        for (Categories category : allCats) {
+            if ("expense".equals(category.getType())) {
+                categories.add(category);
+            }
+        }
         for (Categories category : categories) {
             categoryNames.add(category.getName());
         }
@@ -185,6 +194,15 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
                 categoryNames
         );
         actvCategory.setAdapter(categoryAdapter);
+        
+        android.content.Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("categoryName")) {
+            String presetCategory = intent.getStringExtra("categoryName");
+            actvCategory.setText(presetCategory, false);
+            tilCategory.setVisibility(View.GONE);
+            // set implicit description if they are editing a specific category budget
+            etDescription.setText(presetCategory);
+        }
     }
 
     private void setupDatePickers() {
@@ -289,10 +307,15 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
         // Validate inputs
         String categoryName = actvCategory.getText().toString().trim();
         String amountStr = etAmount.getText().toString().trim();
-        String startDate = etStartDate.getText().toString().trim();
-        String endDate = etEndDate.getText().toString().trim();
+        
+        // Auto set current month range
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        String startDate = dateFormat.format(cal.getTime());
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        String endDate = dateFormat.format(cal.getTime());
+        
         String description = etDescription.getText().toString().trim();
-
 
         if (categoryName.isEmpty()) {
             actvCategory.setError("Vui lòng chọn danh mục");
@@ -301,16 +324,6 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
 
         if (amountStr.isEmpty()) {
             etAmount.setError("Vui lòng nhập số tiền");
-            return;
-        }
-
-        if (startDate.isEmpty()) {
-            etStartDate.setError("Vui lòng chọn ngày bắt đầu");
-            return;
-        }
-
-        if (endDate.isEmpty()) {
-            etEndDate.setError("Vui lòng chọn ngày kết thúc");
             return;
         }
 

@@ -90,6 +90,11 @@ public class CalendarActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
+            } else if (itemId == R.id.nav_budget) {
+                  startActivity(new Intent(CalendarActivity.this, com.example.n03_quanlychitieu.ui.budget.BudgetActivity.class));
+                  overridePendingTransition(0, 0);
+                  finish();
+                  return true;
             } else if (itemId == R.id.nav_more) {
                 startActivity(new Intent(CalendarActivity.this, UserProfileActivity.class));
                 overridePendingTransition(0, 0);

@@ -285,7 +285,13 @@ public class ReportTransaction extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
-            } else if (item.getItemId() == R.id.nav_more) {
+              } else if (item.getItemId() == R.id.nav_budget) {
+                  Intent intent = new Intent(ReportTransaction.this, com.example.n03_quanlychitieu.ui.budget.BudgetActivity.class);
+                  startActivity(intent);
+                  overridePendingTransition(0, 0);
+                  finish();
+                  return true;
+              } else if (item.getItemId() == R.id.nav_more) {
                 String userId = authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUser_id() : null;
                 Intent intent = new Intent(ReportTransaction.this, UserProfileActivity.class);
                 intent.putExtra("userId", userId);

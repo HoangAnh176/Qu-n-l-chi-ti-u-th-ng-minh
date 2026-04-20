@@ -127,7 +127,13 @@ public class MainActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
-            } else if (item.getItemId() == R.id.nav_more) {
+              } else if (item.getItemId() == R.id.nav_budget) {
+                  Intent intent = new Intent(MainActivity.this, com.example.n03_quanlychitieu.ui.budget.BudgetActivity.class);
+                  startActivity(intent);
+                  overridePendingTransition(0, 0);
+                  finish();
+                  return true;
+              } else if (item.getItemId() == R.id.nav_more) {
                 Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
                 intent.putExtra("userId", userId);
                 startActivity(intent);
