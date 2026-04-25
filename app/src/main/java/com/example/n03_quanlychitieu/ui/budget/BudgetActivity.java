@@ -157,15 +157,26 @@ public class BudgetActivity extends AppCompatActivity {
             Budgets totalBudget = null;
             for (Budgets b : allBudgets) {
                 if (b.getCategory_id() == null || b.getCategory_id().isEmpty() || "none".equals(b.getCategory_id())) {
-                    totalBudget = b;
-                    break;
+                    // THÊM LỌC: Kiểm tra xem ngân sách này có hiệu lực trong tháng đang xem không
+                    if (b.getStart_date() != null && b.getEnd_date() != null &&
+                            b.getStart_date().compareTo(strEndDate) <= 0 &&
+                            b.getEnd_date().compareTo(strStartDate) >= 0) {
+                        totalBudget = b;
+                        break;
+                    }
                 }
             }
+
             if (totalBudget == null) {
                 double computedTotal = 0;
                 for (Budgets b : allBudgets) {
                     if (b.getCategory_id() != null && !b.getCategory_id().isEmpty() && !"none".equals(b.getCategory_id())) {
-                        computedTotal += b.getAmount();
+                        // THÊM LỌC tương tự cho việc tính tổng
+                        if (b.getStart_date() != null && b.getEnd_date() != null &&
+                                b.getStart_date().compareTo(strEndDate) <= 0 &&
+                                b.getEnd_date().compareTo(strStartDate) >= 0) {
+                            computedTotal += b.getAmount();
+                        }
                     }
                 }
                 if (computedTotal > 0) {
@@ -174,18 +185,24 @@ public class BudgetActivity extends AppCompatActivity {
             }
             double totalSpentAll = getTotalSpentAll(strStartDate, strEndDate);
             items.add(new BudgetOverviewAdapter.BudgetItem(null, totalBudget, true, totalSpentAll));
+
             for (Categories cat : expenseCategories) {
                 Budgets found = null;
                 for (Budgets b : allBudgets) {
                     if (cat.getCategory_id().equals(b.getCategory_id())) {
-                        found = b;
-                        break;
+                        // THÊM LỌC: Chỉ lấy ngân sách của danh mục này nếu nó nằm trong khoảng thời gian của tháng
+                        if (b.getStart_date() != null && b.getEnd_date() != null &&
+                                b.getStart_date().compareTo(strEndDate) <= 0 &&
+                                b.getEnd_date().compareTo(strStartDate) >= 0) {
+                            found = b;
+                            break;
+                        }
                     }
                 }
                 double catSpent = getTotalSpentForCategory(cat.getCategory_id(), strStartDate, strEndDate);
                 items.add(new BudgetOverviewAdapter.BudgetItem(cat, found, false, catSpent));
             }
-            adapter = new BudgetOverviewAdapter(this, items, budgetDAO);
+            adapter = new BudgetOverviewAdapter(this, items, budgetDAO, currentCal.getTimeInMillis());
             rvBudget.setAdapter(adapter);
         }
     }

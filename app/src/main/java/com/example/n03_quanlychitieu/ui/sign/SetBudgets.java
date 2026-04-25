@@ -96,7 +96,17 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
 
         // Setup date pickers
         setupDatePickers();
+        long selectedTime = getIntent().getLongExtra("selectedTimeInMillis", -1);
+        if (selectedTime != -1) {
+            calendar.setTimeInMillis(selectedTime);
 
+            // Điền sẵn ngày vào etStartDate để logic phía trên lấy được đúng
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            etStartDate.setText(dateFormat.format(calendar.getTime()));
+
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            etEndDate.setText(dateFormat.format(calendar.getTime()));
+        }
         // Setup recycler view
         setupRecyclerView();
 
@@ -307,14 +317,6 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
         // Validate inputs
         String categoryName = actvCategory.getText().toString().trim();
         String amountStr = etAmount.getText().toString().trim();
-        
-        // Auto set current month range
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        String startDate = dateFormat.format(cal.getTime());
-        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        String endDate = dateFormat.format(cal.getTime());
-        
         String description = etDescription.getText().toString().trim();
 
         if (categoryName.isEmpty()) {
@@ -349,6 +351,40 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
             return;
         }
 
+        final String finalCategoryId = categoryId;
+
+        // Xác định tháng bắt đầu từ người dùng chọn, nếu rỗng thì dùng biến calendar của class
+        String startDateInput = etStartDate.getText() != null ? etStartDate.getText().toString().trim() : "";
+        Calendar startCal = (Calendar) this.calendar.clone();
+
+        if (!startDateInput.isEmpty()) {
+            try {
+                startCal.setTime(dateFormat.parse(startDateInput));
+            } catch (Exception ignored) {}
+        }
+
+        startCal.set(Calendar.DAY_OF_MONTH, 1);
+        final String computedStartDate = dateFormat.format(startCal.getTime());
+
+        new AlertDialog.Builder(this)
+                .setTitle("Thời hạn ngân sách")
+                .setMessage("Bạn muốn đặt ngân sách cho khoảng thời gian nào?")
+                .setPositiveButton("Chỉ thay đổi tháng này", (dialog, which) -> {
+                    Calendar endCal = (Calendar) startCal.clone();
+                    endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    String computedEndDate = dateFormat.format(endCal.getTime());
+                    proceedSaveBudget(amount, finalCategoryId, description, computedStartDate, computedEndDate);
+                })
+                .setNegativeButton("Thay đổi tháng này và các tháng sau", (dialog, which) -> {
+                    Calendar futureCal = Calendar.getInstance();
+                    futureCal.set(2099, Calendar.DECEMBER, 31);
+                    String computedEndDate = dateFormat.format(futureCal.getTime());
+                    proceedSaveBudget(amount, finalCategoryId, description, computedStartDate, computedEndDate);
+                })
+                .show();
+    }
+
+    private void proceedSaveBudget(double amount, String categoryId, String description, String startDate, String endDate) {
         long result;
         if (editingBudget != null) {
             // Trường hợp cập nhật budget

@@ -30,6 +30,13 @@ public class BudgetOverviewAdapter extends RecyclerView.Adapter<BudgetOverviewAd
     private List<BudgetItem> items;
     private BudgetDAO budgetDAO;
     private NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+    private long selectedTimeInMillis;
+    public BudgetOverviewAdapter(Context context, List<BudgetItem> items, BudgetDAO budgetDAO, long selectedTimeInMillis) {
+        this.context = context;
+        this.items = items;
+        this.budgetDAO = budgetDAO;
+        this.selectedTimeInMillis = selectedTimeInMillis; // Gán giá trị
+    }
     public BudgetOverviewAdapter(Context context, List<BudgetItem> items, BudgetDAO budgetDAO) {
         this.context = context;
         this.items = items;
@@ -96,6 +103,7 @@ public class BudgetOverviewAdapter extends RecyclerView.Adapter<BudgetOverviewAd
             } else if (item.isTotal) {
                 intent.putExtra("categoryName", "Tổng ngân sách");
             }
+            intent.putExtra("selectedTimeInMillis", selectedTimeInMillis);
             context.startActivity(intent);
         });
     }
