@@ -364,6 +364,12 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
         }
 
         startCal.set(Calendar.DAY_OF_MONTH, 1);
+
+        // Luôn coi "tháng này" là tháng người dùng đang thao tác
+        Calendar currentViewCal = (Calendar) this.calendar.clone();
+        currentViewCal.set(Calendar.DAY_OF_MONTH, 1);
+
+        // Nếu người dùng không cố tình sửa tay start date khác với tháng đang xem, ta sẽ dùng currentViewCal
         final String computedStartDate = dateFormat.format(startCal.getTime());
 
         new AlertDialog.Builder(this)
@@ -373,15 +379,51 @@ public class SetBudgets extends AppCompatActivity implements BudgetAdapter.OnBud
                     Calendar endCal = (Calendar) startCal.clone();
                     endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
                     String computedEndDate = dateFormat.format(endCal.getTime());
+
+                    terminateOverlappingBudgets(finalCategoryId, currentViewCal);
+                    editingBudget = null; // Cờ để tự động tạo mới
                     proceedSaveBudget(amount, finalCategoryId, description, computedStartDate, computedEndDate);
                 })
                 .setNegativeButton("Thay đổi tháng này và các tháng sau", (dialog, which) -> {
                     Calendar futureCal = Calendar.getInstance();
                     futureCal.set(2099, Calendar.DECEMBER, 31);
                     String computedEndDate = dateFormat.format(futureCal.getTime());
+
+                    terminateOverlappingBudgets(finalCategoryId, currentViewCal);
+                    editingBudget = null; // Để insert mới từ tháng này trở đi
                     proceedSaveBudget(amount, finalCategoryId, description, computedStartDate, computedEndDate);
                 })
                 .show();
+    }
+
+    private void terminateOverlappingBudgets(String categoryId, Calendar currentViewCal) {
+        try {
+            BudgetDAO writableDao = new BudgetDAO(dbHelper.getWritableDatabase());
+            List<Budgets> existingBudgets = writableDao.getBudgetsByUser(currentUserId);
+
+            Calendar prevMonthEnd = (Calendar) currentViewCal.clone();
+            prevMonthEnd.add(Calendar.MONTH, -1);
+            prevMonthEnd.set(Calendar.DAY_OF_MONTH, prevMonthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+            String prevEndDateStr = dateFormat.format(prevMonthEnd.getTime());
+            String currentStartDateStr = dateFormat.format(currentViewCal.getTime());
+
+            for (Budgets b : existingBudgets) {
+                if (categoryId.equals(b.getCategory_id())) {
+                    if (b.getEnd_date() != null && b.getEnd_date().compareTo(currentStartDateStr) >= 0) {
+                        if (b.getStart_date() != null && b.getStart_date().compareTo(currentStartDateStr) >= 0) {
+                            // Ngân sách này bắt đầu từ tháng này hoặc trong tương lai -> xoá bỏ để nhường chỗ cho cái mới
+                            writableDao.delete(b.getBudget_id());
+                        } else {
+                            // Ngân sách này từ quá khứ đang kéo dài đến tháng này -> kết thúc nó ở cuối tháng trước
+                            b.setEnd_date(prevEndDateStr);
+                            writableDao.update(b);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("SetBudgets", "Lỗi khi kết thúc ngân sách cũ: ", e);
+        }
     }
 
     private void proceedSaveBudget(double amount, String categoryId, String description, String startDate, String endDate) {
